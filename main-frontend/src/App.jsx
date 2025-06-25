@@ -28,14 +28,14 @@ function Home() {
     }
   }, []);
   return (
-    <section className="w-full flex flex-col justify-center items-center min-h-[calc(100vh-120px)] bg-gradient-to-br from-blue-50 via-white to-blue-100">
-      <div className="w-full max-w-7xl flex flex-col md:flex-row items-center justify-between px-6 md:px-12 py-16 gap-12">
-        <div id="hero-card" className="flex-1 flex flex-col items-start justify-center animate-fadein opacity-0">
+    <section className="w-full min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-50 via-white to-blue-100 p-0 m-0">
+      <div className="w-full h-full flex flex-col md:flex-row items-center justify-between px-0 md:px-0 py-0 gap-0">
+        <div id="hero-card" className="flex-1 flex flex-col items-start justify-center animate-fadein opacity-0 px-8">
           <h1 className="text-6xl font-extrabold mb-6 text-blue-800 tracking-tight leading-tight">Welcome to <span className="text-blue-600">Booking App</span></h1>
-          <p className="text-2xl text-gray-700 mb-8 max-w-2xl leading-relaxed">Your one-stop solution for hotel bookings. Discover, compare, and book the best hotels at the best prices, just like on Goibibo!</p>
+          <p className="text-2xl text-gray-700 mb-8 leading-relaxed w-full">Your one-stop solution for hotel bookings. Discover, compare, and book the best hotels at the best prices, just like on Goibibo!</p>
           <Link to="/hotels" className="inline-block px-10 py-4 bg-blue-600 text-white text-xl font-semibold rounded-full shadow hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-400 animate-fadein opacity-0" id="cta-btn">Find Hotels</Link>
         </div>
-        <div className="flex-1 flex items-center justify-center w-full">
+        <div className="flex-1 flex items-center justify-center w-full h-full">
           <HeroIllustration />
         </div>
       </div>
@@ -55,33 +55,192 @@ function Spinner() {
 }
 
 function HotelsIframe() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const iframeRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [showIframe, setShowIframe] = useState(false);
+  const [search, setSearch] = useState({
+    area: '',
+    checkin: '',
+    checkout: '',
+    guests: 2,
+    rooms: 1,
+  });
+  const [iframeKey, setIframeKey] = useState(0);
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [availableLocations, setAvailableLocations] = useState([]);
 
+  // Fetch locations from backend on mount
   useEffect(() => {
-    setLoading(true);
-    setError(false);
+    fetch('http://localhost:8080/api/hotels/locations')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setAvailableLocations(Array.isArray(data) ? data : []))
+      .catch(() => setAvailableLocations([]));
   }, []);
 
+  // Default today/tomorrow for checkin/checkout
+  useEffect(() => {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    setSearch((s) => ({
+      ...s,
+      checkin: s.checkin || today.toISOString().slice(0, 10),
+      checkout: s.checkout || tomorrow.toISOString().slice(0, 10),
+    }));
+  }, []);
+
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    setSearch((s) => ({ ...s, [name]: value }));
+    if (name === 'area') {
+      if (value.length > 0) {
+        setLocationSuggestions(
+          availableLocations.filter((loc) =>
+            loc.toLowerCase().includes(value.toLowerCase())
+          )
+        );
+        setShowSuggestions(true);
+      } else {
+        setLocationSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }
+  };
+
+  const handleSuggestionClick = (loc) => {
+    setSearch((s) => ({ ...s, area: loc }));
+    setLocationSuggestions([]);
+    setShowSuggestions(false);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setShowIframe(false);
+    setTimeout(() => {
+      setLoading(false);
+      setShowIframe(true);
+      setIframeKey((k) => k + 1); // force iframe reload
+    }, 2000);
+  };
+
+  // Build query string for iframe
+  const query = new URLSearchParams({
+    area: search.area,
+    checkin: search.checkin,
+    checkout: search.checkout,
+    guests: search.guests,
+    rooms: search.rooms,
+  }).toString();
+
   return (
-    <section className="w-full h-screen flex-1 flex flex-col p-0 m-0">
-      {loading && !error && <Spinner />}
-      {error && (
-        <div className="text-center text-red-500 py-10">Failed to load hotels. Please try again later.</div>
-      )}
-      <iframe
-        ref={iframeRef}
-        src="http://localhost:5001"
-        title="Hotels Microfrontend"
-        className={classNames(
-          "w-full h-screen border-0 bg-white transition-opacity duration-300 rounded-none",
-          loading || error ? "opacity-0 pointer-events-none" : "opacity-100"
+    <section className="w-full min-h-screen flex-1 flex flex-col p-0 m-0 bg-gradient-to-br from-blue-50 via-white to-blue-100">
+      {/* Search Bar */}
+      <form
+        onSubmit={handleSearch}
+        className="w-full flex flex-wrap md:flex-nowrap items-end justify-center gap-2 bg-gradient-to-r from-orange-400 to-orange-500 rounded-lg shadow px-2 py-3 mb-4 mt-6 max-w-5xl mx-auto border border-orange-300"
+        autoComplete="off"
+        style={{ position: 'sticky', top: 0, zIndex: 10 }}
+      >
+        <div className="flex flex-col flex-1 min-w-[140px] relative">
+          <label className="text-xs font-semibold text-white mb-1 ml-1">AREA, LANDMARK OR PROPERTY NAME</label>
+          <input
+            name="area"
+            value={search.area}
+            onChange={handleInput}
+            placeholder="Delhi"
+            className="rounded-md px-3 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200"
+            required
+            autoComplete="off"
+            onFocus={() => search.area && setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+          />
+          {showSuggestions && locationSuggestions.length > 0 && (
+            <ul className="absolute z-20 left-0 right-0 bg-white border border-gray-200 rounded-md mt-1 shadow-lg max-h-40 overflow-y-auto text-base">
+              {locationSuggestions.map((loc) => (
+                <li
+                  key={loc}
+                  className="px-3 py-2 cursor-pointer hover:bg-blue-100 text-gray-800"
+                  onMouseDown={() => handleSuggestionClick(loc)}
+                >
+                  {loc}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="flex flex-col flex-1 min-w-[120px]">
+          <label className="text-xs font-semibold text-white mb-1 ml-1">CHECKIN</label>
+          <input
+            name="checkin"
+            type="date"
+            value={search.checkin}
+            onChange={handleInput}
+            className="rounded-md px-3 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200"
+            required
+          />
+        </div>
+        <div className="flex flex-col flex-1 min-w-[120px]">
+          <label className="text-xs font-semibold text-white mb-1 ml-1">CHECKOUT</label>
+          <input
+            name="checkout"
+            type="date"
+            value={search.checkout}
+            onChange={handleInput}
+            className="rounded-md px-3 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200"
+            required
+          />
+        </div>
+        <div className="flex flex-col flex-1 min-w-[140px]">
+          <label className="text-xs font-semibold text-white mb-1 ml-1">GUEST & ROOMS</label>
+          <div className="flex items-center gap-2">
+            <input
+              name="guests"
+              type="number"
+              min="1"
+              value={search.guests}
+              onChange={handleInput}
+              className="rounded-md px-3 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200 w-16"
+            />
+            <span className="inline-block text-white font-semibold">Adults</span>
+            <input
+              name="rooms"
+              type="number"
+              min="1"
+              value={search.rooms}
+              onChange={handleInput}
+              className="rounded-md px-3 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 border border-gray-200 w-16"
+            />
+            <span className="inline-block text-white font-semibold">Room</span>
+          </div>
+        </div>
+        <button
+          type="submit"
+          className="rounded-md px-6 py-2 bg-white text-blue-700 font-bold text-base shadow hover:bg-blue-50 transition border-2 border-white mt-5 md:mt-0"
+        >
+          Update Search
+        </button>
+      </form>
+      {/* Skeleton Loader for Cards Only */}
+      <div className="flex-1 flex flex-col items-center w-full h-full min-h-[400px]">
+        {loading && (
+          <div className="w-full max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white rounded-2xl shadow-lg h-64 animate-pulse flex flex-col p-6"></div>
+            ))}
+          </div>
         )}
-        style={{ width: '100vw', height: '100vh', margin: 0, padding: 0, display: 'block' }}
-        onLoad={() => setLoading(false)}
-        onError={() => { setLoading(false); setError(true); }}
-      />
+        {/* Hotels Iframe */}
+        {showIframe && !loading && (
+          <iframe
+            key={iframeKey}
+            src={`http://localhost:5001?${query}`}
+            title="Hotels Microfrontend"
+            className="w-full h-screen border-0 bg-white transition-opacity duration-300 rounded-none"
+            style={{ width: '100vw', height: '100vh', margin: 0, padding: 0, display: 'block' }}
+          />
+        )}
+      </div>
     </section>
   );
 }
@@ -129,11 +288,12 @@ export default function App() {
       if (cta) cta.classList.remove('opacity-0');
     }, 400);
   }, []);
+  const location = window.location.pathname;
   return (
     <Router>
       <div className="flex flex-col min-h-screen h-full w-full bg-gradient-to-br from-blue-50 via-white to-blue-100">
         <Navbar />
-        <div className="flex-1 flex flex-col w-full h-full p-0 m-0">
+        <div className={location === '/hotels' ? 'flex-1 flex flex-col w-full h-full p-0 m-0' : 'flex-1 flex flex-col w-full'}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/hotels" element={<HotelsIframe />} />
