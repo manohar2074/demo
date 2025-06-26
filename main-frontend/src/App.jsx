@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import PaymentDrawer from './PaymentDrawer';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -289,6 +290,30 @@ export default function App() {
     }, 400);
   }, []);
   const location = window.location.pathname;
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedHotel, setSelectedHotel] = useState(null);
+
+  // Listen for postMessage from Hotels micro frontend
+  const handleMessage = useCallback((event) => {
+    if (event.data && event.data.type === 'BOOK_HOTEL') {
+      const { id } = event.data.hotel;
+      if (id) {
+        setSelectedHotel(undefined); // Show loading state
+        fetch(`http://localhost:8080/api/hotels/${id}`)
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            console.log('Fetched hotel for payment:', data);
+            setSelectedHotel(data);
+            setDrawerOpen(true);
+          });
+      }
+    }
+  }, []);
+  useEffect(() => {
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [handleMessage]);
+
   return (
     <Router>
       <div className="flex flex-col min-h-screen h-full w-full bg-gradient-to-br from-blue-50 via-white to-blue-100">
@@ -300,6 +325,7 @@ export default function App() {
           </Routes>
         </div>
         <Footer />
+        <PaymentDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} hotel={selectedHotel} />
       </div>
     </Router>
   );

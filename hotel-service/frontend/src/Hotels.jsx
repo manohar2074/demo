@@ -7,10 +7,18 @@ const Hotels = () => {
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/hotels")
+    const params = new URLSearchParams(window.location.search);
+    const area = params.get("area");
+    const checkin = params.get("checkin");
+    const checkout = params.get("checkout");
+    let url = "http://localhost:8080/api/hotels";
+    if (area || checkin || checkout) {
+      url = `http://localhost:8080/api/hotels/search?${params.toString()}`;
+    }
+    setLoading(true);
+    fetch(url)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch hotels");
         return res.json();
@@ -23,13 +31,7 @@ const Hotels = () => {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
-
-  const filteredHotels = hotels.filter(
-    (hotel) =>
-      hotel.name.toLowerCase().includes(search.toLowerCase()) ||
-      hotel.location.toLowerCase().includes(search.toLowerCase())
-  );
+  }, [window.location.search]);
 
   if (loading)
     return <div className="text-center mt-10">Loading hotels...</div>;
@@ -38,22 +40,11 @@ const Hotels = () => {
 
   return (
     <div className="w-full min-h-screen bg-white py-8 px-2 md:px-8 flex flex-col">
-      <h1 className="text-4xl font-extrabold mb-8 text-blue-800 text-left pl-2">Find Your Perfect Stay</h1>
-      <div className="flex justify-start mb-10 w-full px-2">
-        <input
-          type="text"
-          placeholder="Search by hotel name or location..."
-          className="w-full max-w-2xl px-5 py-3 rounded-full border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg bg-white"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label="Search hotels"
-        />
-      </div>
-      {filteredHotels.length === 0 ? (
+      {hotels.length === 0 ? (
         <div className="text-center text-gray-500 text-lg">No hotels found.</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
-          {filteredHotels.map((hotel) => (
+          {hotels.map((hotel) => (
             <div
               key={hotel.id}
               className="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-200 flex flex-col overflow-hidden group w-full"
@@ -81,7 +72,19 @@ const Hotels = () => {
                     ₹ {hotel.pricePerDay} <span className="text-sm font-normal text-gray-500">/ night</span>
                   </span>
                 </div>
-                <button className="mt-auto w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition">
+                <button className="mt-auto w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition"
+                  onClick={() => {
+                    if (window.parent !== window) {
+                      window.parent.postMessage({
+                        type: 'BOOK_HOTEL',
+                        hotel: {
+                          id: hotel.id,
+                          name: hotel.name
+                        }
+                      }, '*');
+                    }
+                  }}
+                >
                   Book Now
                 </button>
               </div>
