@@ -79,7 +79,10 @@ const Hotels = () => {
                         type: 'BOOK_HOTEL',
                         hotel: {
                           id: hotel.id,
-                          name: hotel.name
+                          name: hotel.name,
+                          location: hotel.location,
+                          rating: hotel.rating,
+                          pricePerDay: hotel.pricePerDay
                         }
                       }, '*');
                     }

@@ -296,16 +296,12 @@ export default function App() {
   // Listen for postMessage from Hotels micro frontend
   const handleMessage = useCallback((event) => {
     if (event.data && event.data.type === 'BOOK_HOTEL') {
-      const { id } = event.data.hotel;
-      if (id) {
-        setSelectedHotel(undefined); // Show loading state
-        fetch(`http://localhost:8080/api/hotels/${id}`)
-          .then(res => res.ok ? res.json() : null)
-          .then(data => {
-            console.log('Fetched hotel for payment:', data);
-            setSelectedHotel(data);
-            setDrawerOpen(true);
-          });
+      const hotelData = event.data.hotel;
+      if (hotelData && hotelData.id) {
+        // Use the complete hotel data from postMessage instead of fetching from backend
+        console.log('Received hotel data from postMessage:', hotelData);
+        setSelectedHotel(hotelData);
+        setDrawerOpen(true);
       }
     }
   }, []);

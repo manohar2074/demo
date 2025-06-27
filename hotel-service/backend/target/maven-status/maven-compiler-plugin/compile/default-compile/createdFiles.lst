@@ -1,6 +1,0 @@
-com\example\hotelservice\config\CorsConfig.class
-com\example\hotelservice\model\Hotel.class
-com\example\hotelservice\repository\HotelRepository.class
-com\example\hotelservice\config\CorsConfig$1.class
-com\example\hotelservice\controller\HotelController.class
-com\example\hotelservice\HotelServiceApplication.class
