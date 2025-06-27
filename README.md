@@ -114,14 +114,14 @@ All API calls now go through the API Gateway at `http://localhost:8081`:
 ## Configuration
 
 ### Environment Variables
-You can configure the API Gateway URL using environment variables:
+You can configure the API Gateway and Hotel Service URLs using environment variables. It's recommended to create a `.env` file in the root of the `main-frontend` and `hotel-service/frontend` directories.
 
 ```bash
-# For main frontend
-REACT_APP_API_GATEWAY_URL=http://localhost:8081
+# For main-frontend and hotel-service/frontend
+VITE_API_GATEWAY_URL=http://localhost:8081
 
-# For hotel service frontend
-REACT_APP_API_GATEWAY_URL=http://localhost:8081
+# For main-frontend (Hotels Microfrontend iframe)
+VITE_HOTEL_SERVICE_URL=http://localhost:5001
 ```
 
 ### API Gateway Configuration
@@ -133,7 +133,7 @@ spring:
     gateway:
       routes:
         - id: hotel-service
-          uri: http://localhost:8080
+          uri: ${HOTEL_SERVICE_URL:http://localhost:8080}
           predicates:
             - Path=/api/hotels/**
 ```

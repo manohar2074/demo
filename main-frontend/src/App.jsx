@@ -236,7 +236,7 @@ function HotelsIframe() {
         {showIframe && !loading && (
           <iframe
             key={iframeKey}
-            src={`http://localhost:5001?${query}`}
+            src={`${import.meta.env.VITE_HOTEL_SERVICE_URL || 'http://localhost:5001'}?${query}`}
             title="Hotels Microfrontend"
             className="w-full h-screen border-0 bg-white transition-opacity duration-300 rounded-none"
             style={{ width: '100vw', height: '100vh', margin: 0, padding: 0, display: 'block' }}

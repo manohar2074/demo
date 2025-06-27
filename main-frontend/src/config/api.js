@@ -1,7 +1,7 @@
 // API Configuration
 const API_CONFIG = {
   // API Gateway URL
-  GATEWAY_URL: import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:8081',
+  GATEWAY_URL: import.meta.env.VITE_API_GATEWAY_URL,
   
   // Service endpoints
   HOTELS: {
