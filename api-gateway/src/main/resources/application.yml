@@ -1,0 +1,37 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: hotel-service
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/hotels/**
+          filters:
+            - StripPrefix=0
+            # - name: RequestRateLimiter
+            #   args:
+            #     redis-rate-limiter.replenishRate: 10
+            #     redis-rate-limiter.burstCapacity: 20
+            - name: CircuitBreaker
+              args:
+                name: hotel-service-circuit-breaker
+                fallbackUri: forward:/fallback/hotel-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.example.apigateway: DEBUG 

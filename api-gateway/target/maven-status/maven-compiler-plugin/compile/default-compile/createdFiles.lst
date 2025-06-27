@@ -1,0 +1,4 @@
+com/example/apigateway/ApiGatewayApplication.class
+com/example/apigateway/config/CorsConfig.class
+com/example/apigateway/controller/FallbackController.class
+com/example/apigateway/filter/LoggingFilter.class

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_ENDPOINTS } from './config/api';
 
 const placeholderImg =
   "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80";
@@ -13,9 +14,9 @@ const Hotels = () => {
     const area = params.get("area");
     const checkin = params.get("checkin");
     const checkout = params.get("checkout");
-    let url = "http://localhost:8080/api/hotels";
+    let url = API_ENDPOINTS.HOTELS.GET_ALL;
     if (area || checkin || checkout) {
-      url = `http://localhost:8080/api/hotels/search?${params.toString()}`;
+      url = `${API_ENDPOINTS.HOTELS.SEARCH}?${params.toString()}`;
     }
     setLoading(true);
     fetch(url)

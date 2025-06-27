@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/hotels")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5001"})
 public class HotelController {
     private final HotelRepository hotelRepository;
 

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import PaymentDrawer from './PaymentDrawer';
+import { API_ENDPOINTS } from './config/api';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -72,7 +73,7 @@ function HotelsIframe() {
 
   // Fetch locations from backend on mount
   useEffect(() => {
-    fetch('http://localhost:8080/api/hotels/locations')
+    fetch(API_ENDPOINTS.HOTELS.LOCATIONS)
       .then(res => res.ok ? res.json() : [])
       .then(data => setAvailableLocations(Array.isArray(data) ? data : []))
       .catch(() => setAvailableLocations([]));

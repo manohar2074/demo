@@ -1,0 +1,5 @@
+com/example/hotelservice/controller/DataSeeder.class
+com/example/hotelservice/controller/HotelController.class
+com/example/hotelservice/HotelServiceApplication.class
+com/example/hotelservice/repository/HotelRepository.class
+com/example/hotelservice/model/Hotel.class
