@@ -234,13 +234,21 @@ function HotelsIframe() {
         )}
         {/* Hotels Iframe */}
         {showIframe && !loading && (
-          <iframe
-            key={iframeKey}
-            src={`${import.meta.env.VITE_HOTEL_SERVICE_URL || 'http://localhost:5001'}?${query}`}
-            title="Hotels Microfrontend"
-            className="w-full h-screen border-0 bg-white transition-opacity duration-300 rounded-none"
-            style={{ width: '100vw', height: '100vh', margin: 0, padding: 0, display: 'block' }}
-          />
+          <>
+            {import.meta.env.VITE_HOTEL_SERVICE_URL ? (
+              <iframe
+                key={iframeKey}
+                src={`${import.meta.env.VITE_HOTEL_SERVICE_URL}?${query}`}
+                title="Hotels Microfrontend"
+                className="w-full h-screen border-0 bg-white transition-opacity duration-300 rounded-none"
+                style={{ width: '100vw', height: '100vh', margin: 0, padding: 0, display: 'block' }}
+              />
+            ) : (
+              <div className="text-red-600 font-bold text-center mt-10">
+                Error: VITE_HOTEL_SERVICE_URL is not set in your .env file.
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
