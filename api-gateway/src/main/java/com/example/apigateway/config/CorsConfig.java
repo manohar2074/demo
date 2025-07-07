@@ -6,16 +6,21 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+
 @Configuration
 public class CorsConfig {
 
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOriginPatterns(java.util.Arrays.asList("http://13.48.59.248:3000"));
-        corsConfig.setAllowedMethods(java.util.Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        corsConfig.setAllowedHeaders(java.util.Arrays.asList("*"));
-        corsConfig.setAllowCredentials(true);
+
+        // Replace with your real frontend URL
+        corsConfig.setAllowedOriginPatterns(Arrays.asList("http://13.48.59.248:3000"));
+
+        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        corsConfig.setAllowedHeaders(Arrays.asList("*"));
+        corsConfig.setAllowCredentials(true); // Keep true if sending cookies or tokens
         corsConfig.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -23,4 +28,4 @@ public class CorsConfig {
 
         return new CorsWebFilter(source);
     }
-} 
+}
