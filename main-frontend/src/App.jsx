@@ -286,7 +286,7 @@ function Navbar() {
 function Footer() {
   return (
     <footer className="w-full text-center py-4 text-gray-500 text-sm border-t border-blue-100 bg-white h-14 min-h-[56px] flex items-center justify-center">
-      &copy; {new Date().getFullYear()} Booking App. 
+      &copy; {new Date().getFullYear()} Booking Apppmvksm. 
     </footer>
   );
 }
