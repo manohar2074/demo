@@ -1,59 +1,32 @@
 version: "3.8"
- 
 services:
-
-  hotel-backend:
-
-    build: ./hotel-service/backend
-
-    ports:
-
-      - "8080:8080"
-
-    environment:
-
-      SPRING_DATA_MONGODB_URI: mongodb+srv://harshavardhankalla:GBdITMUGHoVmdVH2@cluster0.geqmsjf.mongodb.net/hotel-db?retryWrites=true&w=majority&appName=Cluster0
- 
   api-gateway:
-
     build: ./api-gateway
-
+    ports:
+      - "8081:8081"
+    environment:
+      - HOTEL_SERVICE_URL=http://hotel-backend:8080
     depends_on:
-
       - hotel-backend
 
+  hotel-backend:
+    build: ./hotel-service/backend
     ports:
-
-      - "8081:8081"
-
+      - "8080:8080"
     environment:
+      - MONGODB_URI=mongodb+srv://harshavardhankalla:GBdITMUGHoVmdVH2@cluster0.geqmsjf.mongodb.net/hotel-db?retryWrites=true&w=majority&appName=Cluster0
 
-      HOTEL_SERVICE_URL: http://13.204.76.21:8080
- 
-  hotel-frontend:
-
-    build: ./hotel-service/frontend
-
-    depends_on:
-
-      - api-gateway
-
-    ports:
-
-      - "5001:80"
- 
   main-frontend:
-
     build: ./main-frontend
-
-    depends_on:
-
-      - api-gateway
-
-      - hotel-frontend
-
     ports:
-
       - "3000:80"
+    environment:
+      - VITE_API_GATEWAY_URL=http://13.204.76.21:8081
+      - VITE_HOTEL_SERVICE_URL=http://13.204.76.21:5001
 
- 
+  hotel-frontend:
+    build: ./hotel-service/frontend
+    ports:
+      - "5001:80"
+    environment:
+      - VITE_API_GATEWAY_URL=http://13.204.76.21:8081
