@@ -16,7 +16,7 @@ public class CorsConfig {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
         // Replace with your real frontend URL
-        corsConfig.setAllowedOriginPatterns(Arrays.asList("http://13.48.59.248:3000"));
+        corsConfig.setAllowedOriginPatterns(Arrays.asList("*")); // ⚠️ Don't use in production
 
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfig.setAllowedHeaders(Arrays.asList("*"));
