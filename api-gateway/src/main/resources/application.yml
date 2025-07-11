@@ -9,7 +9,7 @@ spring:
     gateway:
       routes:
         - id: hotel-service
-          uri: ${HOTEL_SERVICE_URL:http://13.204.76.21:8080}
+          uri: ${HOTEL_SERVICE_URL:http://hotel-backend:8080}
           predicates:
             - Path=/api/hotels/**
           filters:
